@@ -19,7 +19,8 @@ const logger = winston.createLogger({
 const program = new Command();
 program
   .requiredOption('-a, --arn <arn>', 'State Machine ARN')
-  .requiredOption('-f, --input <path>', 'path to JSON file used as execution input')
+  .option('-f, --input <path>', 'path to JSON file used as execution input')
+  .option('-d, --data <json>', 'JSON string used as execution input')
   .option('-p, --profile <profile>', 'AWS profile name')
   .option('-i, --interval <seconds>', 'polling interval in seconds', (v) => parseInt(v, 10), 5);
 
@@ -43,16 +44,30 @@ async function poll(client, executionArn, interval) {
 }
 
 async function main() {
-  let inputJson;
-  try {
-    inputJson = JSON.parse(readFileSync(options.input, 'utf8'));
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      logger.error(`input file not found: ${options.input}`);
-    } else {
-      logger.error(`failed to parse input file: ${err.message}`);
-    }
+  if (!options.input && !options.data) {
+    logger.error('either --input or --data is required');
     process.exit(1);
+  }
+
+  let inputJson;
+  if (options.data) {
+    try {
+      inputJson = JSON.parse(options.data);
+    } catch {
+      logger.error('failed to parse --data as JSON');
+      process.exit(1);
+    }
+  } else {
+    try {
+      inputJson = JSON.parse(readFileSync(options.input, 'utf8'));
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        logger.error(`input file not found: ${options.input}`);
+      } else {
+        logger.error(`failed to parse input file: ${err.message}`);
+      }
+      process.exit(1);
+    }
   }
 
   const clientConfig = {};

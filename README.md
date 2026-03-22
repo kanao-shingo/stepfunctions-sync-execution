@@ -15,8 +15,16 @@ yarn install
 
 ## 使い方
 
+JSON ファイルを指定する場合:
+
 ```bash
 node index.js --arn <STATE_MACHINE_ARN> --input <INPUT_FILE>
+```
+
+JSON を直接渡す場合:
+
+```bash
+node index.js --arn <STATE_MACHINE_ARN> --data '{"key": "value"}'
 ```
 
 AWS プロファイルとポーリング間隔を指定する場合:
@@ -40,7 +48,8 @@ node index.js --arn <ARN> --input input.json > result.json
 | オプション | 短縮形 | 必須 | デフォルト | 説明 |
 |---|---|---|---|---|
 | `--arn` | `-a` | はい | - | ステートマシン ARN |
-| `--input` | `-f` | はい | - | 実行 input として渡す JSON ファイルのパス |
+| `--input` | `-f` | `--data` と排他で必須 | - | 実行 input として渡す JSON ファイルのパス |
+| `--data` | `-d` | `--input` と排他で必須 | - | 実行 input として渡す JSON 文字列 |
 | `--profile` | `-p` | いいえ | SDK デフォルト | AWS プロファイル名 |
 | `--interval` | `-i` | いいえ | `5` | ポーリング間隔（秒） |
 
